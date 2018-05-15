@@ -11,7 +11,7 @@ def on_closing(zop):
     if messagebox.askokcancel("Quit", "Do you want to quit?"):
         top.destroy()
 
-def helloCallBack(top,T):
+def storeCallBack(top,T):
     filename = filedialog.asksaveasfilename(initialdir=".", title="Select file",
                                            filetypes=(("doc files", "*.doc"), ("all files", "*.*")))
 
@@ -44,7 +44,7 @@ Label(top, text="Name2:").pack()
 TName2 = Text(top, height=1, width=20)
 TName2.pack()
 
-B = Button(top, text ="Generate Doc File", command = lambda: helloCallBack(top,T))
+B = Button(top, text ="Generate Doc File", command = lambda: storeCallBack(top,T))
 B.pack(side=BOTTOM)
 
 
