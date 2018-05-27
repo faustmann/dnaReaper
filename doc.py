@@ -94,9 +94,9 @@ def printNumbering(p, start, end):
     numberingSting = [(' ' * getNumOfSpaces(number)) + number for number in numbering]
     p.add_run(' ' + ''.join(numberingSting))
 
-def printIndicator(paragraph):
+def printIndicator(paragraph, stepSize):
     indicator = '....|....|....|....|....|....|....|....|....|....|....|....|'
-    paragraph.add_run(indicator).add_break()
+    paragraph.add_run(indicator[:stepSize]).add_break()
 
 
 def printAminoAcids(paragraph, baseSequence):
@@ -115,17 +115,34 @@ def printAminoAcids(paragraph, baseSequence):
         numberOfSpaces = 2
     paragraph.add_run().add_break()
 
-def printUnknown(paragraph,baseSequence):
+def printDiffBaseSeq(paragraph, mainBaseSequence, secondBaseSequence):
+    mainAminoAcids = mainBaseSequence
+    secondAminoAcids = secondBaseSequence
+
+    for index, base in enumerate(secondAminoAcids):
+        if base == mainAminoAcids[index]:
+            sign = '.'
+        else:
+            sign = base
+        run = paragraph.add_run(sign)
+        run.bold = True
+        font = run.font
+        baseColor = base2Color[base]
+        font.color.rgb = RGBColor(baseColor[0], baseColor[1], baseColor[2])
+
     paragraph.add_run().add_break()
 
-def printStars(paragraph,baseSequence):
-    aminoAcids = convertBasesSequence2AminoAcid(baseSequence)
-
-    print(''.join(aminoAcids) == expectedResult)
+def printDiffAminoAcids(paragraph, mainBaseSequence, secondBaseSequence):
+    mainAminoAcids = convertBasesSequence2AminoAcid(mainBaseSequence)
+    secondAminoAcids = convertBasesSequence2AminoAcid(secondBaseSequence)
 
     numberOfSpaces = 1
-    for aminoAcid in aminoAcids:
-        run = paragraph.add_run((' '*numberOfSpaces) + '*')
+    for index, aminoAcid in enumerate(secondAminoAcids):
+        if aminoAcid == mainAminoAcids[index]:
+            sign = '*'
+        else:
+            sign = aminoAcid
+        run = paragraph.add_run((' '*numberOfSpaces) + sign)
         run.bold = True
         font = run.font
         aminoAcidColor = aminoAcid2Color[aminoAcid]
@@ -133,12 +150,15 @@ def printStars(paragraph,baseSequence):
 
         numberOfSpaces = 2
 
-def generateAndPersistDocument(filename, names, sequencce):
+def generateAndPersistDocument(filename, names, sequencces, stepSize):
     name1 = names[0]
     name2 = names[1]
 
-    stepSize = 60
-    sequencesPerLines = [sequencce[i:i + stepSize] for i in range(0, len(sequencce), stepSize)]
+    mainSequence = sequencces[0]
+    secondSequence = sequencces[1]
+
+    mainSequencesPerLines = [mainSequence[i:i + stepSize] for i in range(0, len(mainSequence), stepSize)]
+    secondsequencesPerLines = [secondSequence[i:i + stepSize] for i in range(0, len(secondSequence), stepSize)]
 
     document = Document()
 
@@ -147,18 +167,18 @@ def generateAndPersistDocument(filename, names, sequencce):
     font.name = 'Courier New'
     font.size = Pt(10)
 
-    for index,sequencesPerLine in enumerate(sequencesPerLines):
-        startPosition = 60 * index + 10
-        endPosition = startPosition + 50
+    for index,sequencesPerLine in enumerate(mainSequencesPerLines):
+        startPosition = stepSize * index + 10
+        endPosition = startPosition + (stepSize-10)
         p = document.add_paragraph()
 
-        p.add_run(' '*11)
+        p.add_run(' ' * 11)
 
         printNumbering(p,startPosition, endPosition)
         p = document.add_paragraph()
 
         p.add_run(' ' * 11)
-        printIndicator(p)
+        printIndicator(p, stepSize)
 
         p.add_run(' ' * 11)
         printAminoAcids(p,sequencesPerLine)
@@ -167,10 +187,10 @@ def generateAndPersistDocument(filename, names, sequencce):
         printBases(p, sequencesPerLine)
 
         p.add_run(name2 + ' ' * (11 - len(name2))).bold = True
-        printUnknown(p,sequencesPerLine)
+        printDiffBaseSeq(p, sequencesPerLine, secondsequencesPerLines[index])
 
         p.add_run(' ' * 11)
-        printStars(p,sequencesPerLine)
+        printDiffAminoAcids(p, sequencesPerLine, secondsequencesPerLines[index])
 
     document.save(filename)
 
