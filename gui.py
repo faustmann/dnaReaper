@@ -28,7 +28,7 @@ def storeCallBack(top,T1, T2):
     names = [name1, name2]
 
     doc.generateAndPersistDocument(filename, names, texts, stepSize)
-    messagebox.showinfo("sucess", "File %s generated"%(filename))
+    messagebox.showinfo("success", "File %s generated"%(filename))
 
 
 top = Tk()
